@@ -180,7 +180,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "healthtracker-rs"
+name = "healthtracker"
 version = "0.1.0"
 dependencies = [
  "chrono",

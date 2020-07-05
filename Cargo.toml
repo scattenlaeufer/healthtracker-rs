@@ -1,5 +1,5 @@
 [package]
-name = "healthtracker-rs"
+name = "healthtracker"
 version = "0.1.0"
 authors = ["Björn Guth <scatty@bguth.de>"]
 edition = "2018"
