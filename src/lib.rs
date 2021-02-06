@@ -58,7 +58,6 @@ impl From<ron::Error> for HealthTrackerError {
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Day {
-    date: NaiveDate,
     /// weight of the day
     weight: Option<f32>,
     /// did I do my 7 minute workout?
@@ -70,24 +69,13 @@ struct Day {
 }
 
 impl Day {
-    fn new(
-        date_str: Option<String>,
-        weight: Option<f32>,
-        workout: bool,
-        training: bool,
-        biking: Option<f32>,
-    ) -> Result<Self, HealthTrackerError> {
-        let date = match date_str {
-            Some(s) => NaiveDate::parse_from_str(&s, DATE_FORMAT)?,
-            None => Local::today().naive_local(),
-        };
-        Ok(Self {
-            date,
+    fn new(weight: Option<f32>, workout: bool, training: bool, biking: Option<f32>) -> Self {
+        Self {
             weight,
             workout,
             training,
             biking,
-        })
+        }
     }
 }
 
@@ -110,6 +98,17 @@ impl History {
 }
 
 impl History {
+    fn log_weight(&mut self, date: NaiveDate, weight: f32) {
+        let day = if let Some(day) = self.map.get(&date) {
+            Day::new(Some(weight), day.workout, day.training, day.biking)
+        } else {
+            Day::new(Some(weight), false, false, None)
+        };
+        self.map.insert(date, day);
+    }
+}
+
+impl History {
     fn save(&self) -> Result<(), HealthTrackerError> {
         let xdg_basedir = xdg::BaseDirectories::with_prefix(clap::crate_name!())?;
         let path = xdg_basedir.place_data_file(DATA_FILE_NAME)?;
@@ -120,13 +119,18 @@ impl History {
     }
 }
 
+fn get_date(date_str: Option<String>) -> Result<NaiveDate, HealthTrackerError> {
+    match date_str {
+        Some(s) => Ok(NaiveDate::parse_from_str(&s, DATE_FORMAT)?),
+        None => Ok(Local::today().naive_local()),
+    }
+}
+
 pub fn log_weight(weight: f32, date_str: Option<String>) -> Result<(), HealthTrackerError> {
-    let history = History::load()?;
-    println!("{:#?}", history);
-    println!("{:?}", ron::ser::to_string(&history));
+    let mut history = History::load()?;
+    let date = get_date(date_str)?;
+    history.log_weight(date, weight);
     history.save()?;
 
-    let day = Day::new(date_str, Some(weight), false, false, None)?;
-    println!("{:#?}", day);
     Ok(())
 }
