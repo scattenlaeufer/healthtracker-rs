@@ -121,7 +121,7 @@ fn main() {
         .unwrap();
     }
 
-    if let Some(_) = matches.subcommand_matches("analyze") {
+    if matches.subcommand_matches("analyze").is_some() {
         healthtracker::analyze().unwrap();
     }
 }
