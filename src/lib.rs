@@ -106,6 +106,23 @@ impl History {
         };
         self.map.insert(date, day);
     }
+
+    fn log_sport(&mut self, date: NaiveDate, workout: bool, training: bool, biking: Option<f32>) {
+        let day = if let Some(day) = self.map.get(&date) {
+            Day::new(
+                day.weight,
+                day.workout || workout,
+                day.training || training,
+                match biking {
+                    Some(d) => Some(d),
+                    None => day.biking,
+                },
+            )
+        } else {
+            Day::new(None, workout, training, biking)
+        };
+        self.map.insert(date, day);
+    }
 }
 
 impl History {
@@ -130,6 +147,20 @@ pub fn log_weight(weight: f32, date_str: Option<String>) -> Result<(), HealthTra
     let mut history = History::load()?;
     let date = get_date(date_str)?;
     history.log_weight(date, weight);
+    history.save()?;
+
+    Ok(())
+}
+
+pub fn log_sport(
+    workout: bool,
+    training: bool,
+    biking: Option<f32>,
+    date_str: Option<String>,
+) -> Result<(), HealthTrackerError> {
+    let mut history = History::load()?;
+    let date = get_date(date_str)?;
+    history.log_sport(date, workout, training, biking);
     history.save()?;
 
     Ok(())

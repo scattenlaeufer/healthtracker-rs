@@ -77,8 +77,6 @@ fn main() {
         )
         .get_matches();
 
-    println!("{:?}", matches);
-
     if let Some(matches) = matches.subcommand_matches("weight") {
         healthtracker::log_weight(
             matches.value_of("weight").unwrap().parse::<f32>().unwrap(),
@@ -87,16 +85,40 @@ fn main() {
         .unwrap();
     }
 
-    if let Some(_matches) = matches.subcommand_matches("workout") {
-        println!("Not implemented yet!");
+    if let Some(matches) = matches.subcommand_matches("workout") {
+        healthtracker::log_sport(
+            true,
+            false,
+            None,
+            Some(matches.value_of("date").unwrap().to_string()),
+        )
+        .unwrap();
     }
 
-    if let Some(_matches) = matches.subcommand_matches("training") {
-        println!("Not implemented yet!");
+    if let Some(matches) = matches.subcommand_matches("training") {
+        healthtracker::log_sport(
+            false,
+            true,
+            None,
+            Some(matches.value_of("date").unwrap().to_string()),
+        )
+        .unwrap();
     }
 
-    if let Some(_matches) = matches.subcommand_matches("biking") {
-        println!("Not implemented yet!");
+    if let Some(matches) = matches.subcommand_matches("biking") {
+        healthtracker::log_sport(
+            false,
+            false,
+            Some(
+                matches
+                    .value_of("distance")
+                    .unwrap()
+                    .parse::<f32>()
+                    .unwrap(),
+            ),
+            Some(matches.value_of("date").unwrap().to_string()),
+        )
+        .unwrap();
     }
 
     if let Some(_) = matches.subcommand_matches("analyze") {
