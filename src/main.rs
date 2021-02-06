@@ -3,18 +3,18 @@ use clap::{crate_authors, crate_description, crate_name, crate_version, App, Arg
 
 fn main() {
     fn datetime_validator(s: String) -> Result<(), String> {
-        match Local.datetime_from_str(&s, healthtracker::DATETIME_FORMAT) {
+        match NaiveDate::parse_from_str(&s, healthtracker::DATE_FORMAT) {
             Ok(_) => Ok(()),
             Err(_) => Err(format!(
                 "Must comply with {} format!",
-                healthtracker::DATETIME_FORMAT
+                healthtracker::DATE_FORMAT
             )),
         }
     }
 
-    let date_help_str = format!("Date formatted as \"{}\"", healthtracker::DATETIME_FORMAT);
-    let current_datetime = Local::now()
-        .format(&healthtracker::DATETIME_FORMAT)
+    let date_help_str = format!("Date formatted as \"{}\"", healthtracker::DATE_FORMAT);
+    let current_datetime = Local::today()
+        .format(&healthtracker::DATE_FORMAT)
         .to_string();
 
     let date_argument = Arg::with_name("date")
@@ -51,4 +51,12 @@ fn main() {
         .get_matches();
 
     println!("{:?}", matches);
+
+    if let Some(matches) = matches.subcommand_matches("weight") {
+        healthtracker::log_weight(
+            matches.value_of("weight").unwrap().parse::<f32>().unwrap(),
+            Some(matches.value_of("date").unwrap().to_string()),
+        )
+        .unwrap();
+    }
 }
