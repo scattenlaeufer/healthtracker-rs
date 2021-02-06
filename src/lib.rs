@@ -134,3 +134,9 @@ pub fn log_weight(weight: f32, date_str: Option<String>) -> Result<(), HealthTra
 
     Ok(())
 }
+
+pub fn analyze() -> Result<(), HealthTrackerError> {
+    let history = History::load()?;
+    println!("{:#?}", history);
+    Ok(())
+}

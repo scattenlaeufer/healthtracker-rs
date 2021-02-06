@@ -43,6 +43,33 @@ fn main() {
                 ),
         )
         .subcommand(
+            SubCommand::with_name("workout")
+                .author(crate_authors!())
+                .version(crate_version!())
+                .about("Track a 7 minute workout for a given day.")
+                .arg(&date_argument),
+        )
+        .subcommand(
+            SubCommand::with_name("training")
+                .author(crate_authors!())
+                .version(crate_version!())
+                .about("Track a propper training session for a given day.")
+                .arg(&date_argument),
+        )
+        .subcommand(
+            SubCommand::with_name("biking")
+                .author(crate_authors!())
+                .version(crate_version!())
+                .about("Track a biking distance for a given day")
+                .arg(&date_argument)
+                .arg(
+                    Arg::with_name("distance")
+                        .value_name("DISTANCE")
+                        .required(true)
+                        .help("The driven distance"),
+                ),
+        )
+        .subcommand(
             SubCommand::with_name("analyze")
                 .author(crate_authors!())
                 .version(crate_version!())
@@ -58,5 +85,21 @@ fn main() {
             Some(matches.value_of("date").unwrap().to_string()),
         )
         .unwrap();
+    }
+
+    if let Some(_matches) = matches.subcommand_matches("workout") {
+        println!("Not implemented yet!");
+    }
+
+    if let Some(_matches) = matches.subcommand_matches("training") {
+        println!("Not implemented yet!");
+    }
+
+    if let Some(_matches) = matches.subcommand_matches("biking") {
+        println!("Not implemented yet!");
+    }
+
+    if let Some(_) = matches.subcommand_matches("analyze") {
+        healthtracker::analyze().unwrap();
     }
 }
