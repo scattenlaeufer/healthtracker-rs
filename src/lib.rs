@@ -8,6 +8,7 @@ use std::io::BufWriter;
 
 pub const DATE_FORMAT: &str = "%Y-%m-%d";
 const DATA_FILE_NAME: &str = "data.ron";
+const BIKING_DISTANCE: f32 = 10.0;
 
 #[derive(Debug)]
 pub enum HealthTrackerError {
@@ -134,6 +135,19 @@ impl History {
         write!(&mut writer, "{}", ron::ser::to_string(&self)?)?;
         Ok(())
     }
+
+    fn get_sport_streak(&self, date: NaiveDate) -> u32 {
+        let day = match self.map.get(&date) {
+            Some(d) => d,
+            None => return 0,
+        };
+
+        if day.workout || day.training || day.biking.unwrap_or(0.0) >= BIKING_DISTANCE {
+            1 + self.get_sport_streak(date.pred())
+        } else {
+            0
+        }
+    }
 }
 
 fn get_date(date_str: Option<String>) -> Result<NaiveDate, HealthTrackerError> {
@@ -169,5 +183,10 @@ pub fn log_sport(
 pub fn analyze() -> Result<(), HealthTrackerError> {
     let history = History::load()?;
     println!("{:#?}", history);
+
+    let sport_streak = history.get_sport_streak(get_date(None)?);
+
+    println!("Current sport streak: {}", sport_streak);
+
     Ok(())
 }
