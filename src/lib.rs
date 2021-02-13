@@ -1,4 +1,5 @@
 use chrono::prelude::*;
+use prettytable::{cell, format, row, Table};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
@@ -9,6 +10,8 @@ use std::io::BufWriter;
 pub const DATE_FORMAT: &str = "%Y-%m-%d";
 const DATA_FILE_NAME: &str = "data.ron";
 const BIKING_DISTANCE: f32 = 10.0;
+const CHECK: &str = "✔";
+const FAIL: &str = "✘";
 
 #[derive(Debug)]
 pub enum HealthTrackerError {
@@ -148,6 +151,48 @@ impl History {
             0
         }
     }
+
+    fn get_days_table(&self) -> Table {
+        let mut table = Table::new();
+        table.set_format(*format::consts::FORMAT_NO_LINESEP_WITH_TITLE);
+        table.set_titles(row![
+            "date",
+            "weight [kg]",
+            "workout",
+            "training",
+            "biking [km]"
+        ]);
+
+        let mut history_vec = self.map.iter().collect::<Vec<_>>();
+        history_vec.sort_by(|a, b| a.0.cmp(b.0));
+        for (date, day) in history_vec.iter() {
+            let weight = match day.weight {
+                Some(w) => w.to_string(),
+                None => "".to_string(),
+            };
+            let biking = match day.biking {
+                Some(b) => b.to_string(),
+                None => "".to_string(),
+            };
+            table.add_row(row![
+                date,
+                weight,
+                get_mark(day.workout),
+                get_mark(day.training),
+                biking
+            ]);
+        }
+
+        table
+    }
+}
+
+fn get_mark(input: bool) -> String {
+    if input {
+        CHECK.to_string()
+    } else {
+        FAIL.to_string()
+    }
 }
 
 fn get_date(date_str: Option<String>) -> Result<NaiveDate, HealthTrackerError> {
@@ -182,7 +227,9 @@ pub fn log_sport(
 
 pub fn analyze() -> Result<(), HealthTrackerError> {
     let history = History::load()?;
-    println!("{:#?}", history);
+
+    let table = history.get_days_table();
+    table.printstd();
 
     let sport_streak = history.get_sport_streak(get_date(None)?);
 
