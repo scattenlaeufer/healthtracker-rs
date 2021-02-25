@@ -73,6 +73,9 @@ struct Day {
     /// is this a cheatday?
     #[serde(default)]
     cheatday: bool,
+    /// where you ill on that day?
+    #[serde(default)]
+    ill: bool,
 }
 
 impl Day {
@@ -82,6 +85,7 @@ impl Day {
         training: bool,
         biking: Option<f32>,
         cheatday: bool,
+        ill: bool,
     ) -> Self {
         Self {
             weight,
@@ -89,6 +93,7 @@ impl Day {
             training,
             biking,
             cheatday,
+            ill,
         }
     }
 }
@@ -120,9 +125,10 @@ impl History {
                 day.training,
                 day.biking,
                 day.cheatday,
+                day.ill,
             )
         } else {
-            Day::new(Some(weight), false, false, None, false)
+            Day::new(Some(weight), false, false, None, false, false)
         };
         self.map.insert(date, day);
     }
@@ -134,6 +140,7 @@ impl History {
         training: bool,
         biking: Option<f32>,
         cheatday: bool,
+        ill: bool,
     ) {
         let day = if let Some(day) = self.map.get(&date) {
             Day::new(
@@ -145,9 +152,10 @@ impl History {
                     None => day.biking,
                 },
                 day.cheatday || cheatday,
+                day.ill || ill,
             )
         } else {
-            Day::new(None, workout, training, biking, cheatday)
+            Day::new(None, workout, training, biking, cheatday, ill)
         };
         self.map.insert(date, day);
     }
@@ -185,7 +193,8 @@ impl History {
             "workout",
             "training",
             "biking [km]",
-            "cheat day"
+            "cheat day",
+            "ill"
         ]);
 
         let mut history_vec = self.map.iter().collect::<Vec<_>>();
@@ -206,6 +215,7 @@ impl History {
                 get_mark(day.training),
                 biking,
                 get_mark(day.cheatday),
+                get_mark(day.ill),
             ]);
         }
 
@@ -242,11 +252,12 @@ pub fn log_sport(
     training: bool,
     biking: Option<f32>,
     cheatday: bool,
+    ill: bool,
     date_str: Option<String>,
 ) -> Result<(), HealthTrackerError> {
     let mut history = History::load()?;
     let date = get_date(date_str)?;
-    history.log_sport(date, workout, training, biking, cheatday);
+    history.log_sport(date, workout, training, biking, cheatday, ill);
     history.save()?;
 
     Ok(())

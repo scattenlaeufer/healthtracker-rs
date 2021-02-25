@@ -77,6 +77,13 @@ fn main() {
                 .arg(&date_argument),
         )
         .subcommand(
+            SubCommand::with_name("ill")
+                .author(crate_authors!())
+                .version(crate_version!())
+                .about("Define a day as an illness day.")
+                .arg(&date_argument),
+        )
+        .subcommand(
             SubCommand::with_name("analyze")
                 .author(crate_authors!())
                 .version(crate_version!())
@@ -98,6 +105,7 @@ fn main() {
             false,
             None,
             false,
+            false,
             Some(matches.value_of("date").unwrap().to_string()),
         )
         .unwrap();
@@ -108,6 +116,7 @@ fn main() {
             false,
             true,
             None,
+            false,
             false,
             Some(matches.value_of("date").unwrap().to_string()),
         )
@@ -126,6 +135,7 @@ fn main() {
                     .unwrap(),
             ),
             false,
+            false,
             Some(matches.value_of("date").unwrap().to_string()),
         )
         .unwrap();
@@ -136,6 +146,17 @@ fn main() {
             false,
             false,
             None,
+            true,
+            false,
+            Some(matches.value_of("date").unwrap().to_string()),
+        )
+        .unwrap();
+    } else if let Some(matches) = matches.subcommand_matches("ill") {
+        healthtracker::log_sport(
+            false,
+            false,
+            None,
+            false,
             true,
             Some(matches.value_of("date").unwrap().to_string()),
         )
