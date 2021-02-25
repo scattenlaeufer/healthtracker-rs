@@ -97,9 +97,7 @@ fn main() {
             Some(matches.value_of("date").unwrap().to_string()),
         )
         .unwrap();
-    }
-
-    if let Some(matches) = matches.subcommand_matches("workout") {
+    } else if let Some(matches) = matches.subcommand_matches("workout") {
         healthtracker::log_sport(
             true,
             false,
@@ -109,9 +107,7 @@ fn main() {
             Some(matches.value_of("date").unwrap().to_string()),
         )
         .unwrap();
-    }
-
-    if let Some(matches) = matches.subcommand_matches("training") {
+    } else if let Some(matches) = matches.subcommand_matches("training") {
         healthtracker::log_sport(
             false,
             true,
@@ -121,9 +117,7 @@ fn main() {
             Some(matches.value_of("date").unwrap().to_string()),
         )
         .unwrap();
-    }
-
-    if let Some(matches) = matches.subcommand_matches("biking") {
+    } else if let Some(matches) = matches.subcommand_matches("biking") {
         healthtracker::log_sport(
             false,
             false,
@@ -139,9 +133,7 @@ fn main() {
             Some(matches.value_of("date").unwrap().to_string()),
         )
         .unwrap();
-    }
-
-    if let Some(matches) = matches.subcommand_matches("cheatday") {
+    } else if let Some(matches) = matches.subcommand_matches("cheatday") {
         healthtracker::log_sport(
             false,
             false,
@@ -161,9 +153,7 @@ fn main() {
             Some(matches.value_of("date").unwrap().to_string()),
         )
         .unwrap();
-    }
-
-    if matches.subcommand_matches("analyze").is_some() {
+    } else if matches.subcommand_matches("analyze").is_some() {
         healthtracker::analyze().unwrap();
     }
 }
