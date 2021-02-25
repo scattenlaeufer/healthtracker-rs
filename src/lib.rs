@@ -10,6 +10,7 @@ use std::io::BufWriter;
 pub const DATE_FORMAT: &str = "%Y-%m-%d";
 const DATA_FILE_NAME: &str = "data.ron";
 const BIKING_DISTANCE: f32 = 10.0;
+const MIN_CHEATDAY_DISTANCE: u32 = 7;
 const CHECK: &str = "✔";
 const FAIL: &str = "✘";
 
@@ -171,6 +172,19 @@ impl History {
         Ok(())
     }
 
+    fn get_cheatday_distance(&self, date: NaiveDate, depth: u32) -> u32 {
+        let day = match self.map.get(&date) {
+            Some(d) => d,
+            None => return 0,
+        };
+
+        if !day.cheatday && depth > 0 {
+            1 + self.get_cheatday_distance(date.pred(), depth - 1)
+        } else {
+            0
+        }
+    }
+
     fn get_sport_streak(&self, date: NaiveDate) -> u32 {
         let day = match self.map.get(&date) {
             Some(d) => d,
@@ -179,6 +193,16 @@ impl History {
 
         if day.workout || day.training || day.biking.unwrap_or(0.0) >= BIKING_DISTANCE {
             1 + self.get_sport_streak(date.pred())
+        } else if day.ill {
+            self.get_sport_streak(date.pred())
+        } else if day.cheatday {
+            if self.get_cheatday_distance(date.pred(), MIN_CHEATDAY_DISTANCE)
+                == MIN_CHEATDAY_DISTANCE
+            {
+                self.get_sport_streak(date.pred())
+            } else {
+                0
+            }
         } else {
             0
         }
