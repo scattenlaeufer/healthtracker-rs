@@ -70,15 +70,25 @@ struct Day {
     training: bool,
     /// how much did I bike on that day?
     biking: Option<f32>,
+    /// is this a cheatday?
+    #[serde(default)]
+    cheatday: bool,
 }
 
 impl Day {
-    fn new(weight: Option<f32>, workout: bool, training: bool, biking: Option<f32>) -> Self {
+    fn new(
+        weight: Option<f32>,
+        workout: bool,
+        training: bool,
+        biking: Option<f32>,
+        cheatday: bool,
+    ) -> Self {
         Self {
             weight,
             workout,
             training,
             biking,
+            cheatday,
         }
     }
 }
@@ -104,14 +114,27 @@ impl History {
 impl History {
     fn log_weight(&mut self, date: NaiveDate, weight: f32) {
         let day = if let Some(day) = self.map.get(&date) {
-            Day::new(Some(weight), day.workout, day.training, day.biking)
+            Day::new(
+                Some(weight),
+                day.workout,
+                day.training,
+                day.biking,
+                day.cheatday,
+            )
         } else {
-            Day::new(Some(weight), false, false, None)
+            Day::new(Some(weight), false, false, None, false)
         };
         self.map.insert(date, day);
     }
 
-    fn log_sport(&mut self, date: NaiveDate, workout: bool, training: bool, biking: Option<f32>) {
+    fn log_sport(
+        &mut self,
+        date: NaiveDate,
+        workout: bool,
+        training: bool,
+        biking: Option<f32>,
+        cheatday: bool,
+    ) {
         let day = if let Some(day) = self.map.get(&date) {
             Day::new(
                 day.weight,
@@ -121,9 +144,10 @@ impl History {
                     Some(d) => Some(d),
                     None => day.biking,
                 },
+                day.cheatday || cheatday,
             )
         } else {
-            Day::new(None, workout, training, biking)
+            Day::new(None, workout, training, biking, cheatday)
         };
         self.map.insert(date, day);
     }
@@ -160,7 +184,8 @@ impl History {
             "weight [kg]",
             "workout",
             "training",
-            "biking [km]"
+            "biking [km]",
+            "cheat day"
         ]);
 
         let mut history_vec = self.map.iter().collect::<Vec<_>>();
@@ -179,7 +204,8 @@ impl History {
                 weight,
                 get_mark(day.workout),
                 get_mark(day.training),
-                biking
+                biking,
+                get_mark(day.cheatday),
             ]);
         }
 
@@ -215,11 +241,12 @@ pub fn log_sport(
     workout: bool,
     training: bool,
     biking: Option<f32>,
+    cheatday: bool,
     date_str: Option<String>,
 ) -> Result<(), HealthTrackerError> {
     let mut history = History::load()?;
     let date = get_date(date_str)?;
-    history.log_sport(date, workout, training, biking);
+    history.log_sport(date, workout, training, biking, cheatday);
     history.save()?;
 
     Ok(())

@@ -70,6 +70,13 @@ fn main() {
                 ),
         )
         .subcommand(
+            SubCommand::with_name("cheatday")
+                .author(crate_authors!())
+                .version(crate_version!())
+                .about("Define a day as cheat day.")
+                .arg(&date_argument),
+        )
+        .subcommand(
             SubCommand::with_name("analyze")
                 .author(crate_authors!())
                 .version(crate_version!())
@@ -90,6 +97,7 @@ fn main() {
             true,
             false,
             None,
+            false,
             Some(matches.value_of("date").unwrap().to_string()),
         )
         .unwrap();
@@ -100,6 +108,7 @@ fn main() {
             false,
             true,
             None,
+            false,
             Some(matches.value_of("date").unwrap().to_string()),
         )
         .unwrap();
@@ -116,6 +125,18 @@ fn main() {
                     .parse::<f32>()
                     .unwrap(),
             ),
+            false,
+            Some(matches.value_of("date").unwrap().to_string()),
+        )
+        .unwrap();
+    }
+
+    if let Some(matches) = matches.subcommand_matches("cheatday") {
+        healthtracker::log_sport(
+            false,
+            false,
+            None,
+            true,
             Some(matches.value_of("date").unwrap().to_string()),
         )
         .unwrap();
